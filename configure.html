@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeerFlow Configuration for Pinokio</title>
+<style>
+body {
+  font-family: sans-serif;
+  font-size: 14px;
+  margin: 0;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+form {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.item {
+  margin-bottom: 15px;
+}
+.item legend {
+  font-weight:bold; color: #0056b3; font-size: 1.1em; margin-bottom:10px; padding-left: 0;
+}
+.item label {
+  display: block;
+  padding: 5px 0;
+  font-weight: bold;
+  color: #007bff; /* royalblue */
+}
+.item input[type="text"],
+.item input[type="url"],
+.item input[type="password"],
+.item select {
+  width: 100%;
+  border: 1px solid #ced4da; /* rgba(0,0,0,0.3) */
+  margin: 5px 0;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  font-size: 14px;
+}
+form button {
+  background: #343a40; /* rgba(0,0,0,0.9) */
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+form button:hover {
+    background: #23272b;
+}
+.advanced-toggle {
+  padding: 10px;
+  margin: 20px 0;
+  background: #e9ecef; /* rgba(0,0,100, 0.04) */
+  border-radius: 4px;
+}
+.advanced-toggle h3 {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: 16px;
+  color: #495057;
+}
+.advanced-content {
+  padding-left: 10px;
+  border-left: 3px solid #007bff;
+  margin-top: 10px;
+  display: none; /* Initially hidden */
+}
+.note { font-size: 0.9em; color: #555; margin-bottom: 15px; background-color: #eef; padding: 10px; border-left: 3px solid #007bff; border-radius: 4px;}
+.warning { font-size: 0.9em; color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 10px; border-left: 3px solid #dc3545; margin-bottom: 10px; border-radius: 4px;}
+.hidden { display: none; } /* Utility class */
+a { color: #007bff; }
+a:hover { text-decoration: underline; }
+fieldset { border: 1px solid #eee; border-radius: 4px; padding: 15px; margin-bottom: 20px;}
+fieldset legend { font-weight:bold; color: #0056b3; font-size: 1.1em; padding: 0 5px; margin-left: 10px;}
+
+</style>
+</head>
+<body>
+<form id="configForm">
+    <h2>DeerFlow Configuration</h2>
+    <p class="note">
+        Use this form to configure your DeerFlow installation within Pinokio.
+        Submitting this form will trigger a Pinokio script (<code>apply_config.js</code>) to create or update
+        the <code>.env</code> and <code>conf.yaml</code> files in your DeerFlow project directory.
+    </p>
+
+    <fieldset>
+        <legend>.env Configuration</legend>
+
+        <div class='item'>
+            <label for="envDebug">DEBUG mode:</label>
+            <select id="envDebug">
+                <option value="True" selected>True (Development)</option>
+                <option value="False">False (Production)</option>
+            </select>
+        </div>
+
+        <div class='item'>
+            <label for="envAppEnv">Application Environment (APP_ENV):</label>
+            <select id="envAppEnv">
+                <option value="development" selected>development</option>
+                <option value="production">production</option>
+            </select>
+        </div>
+        
+        <div class='item'>
+            <label for="envNextPublicApiUrl">Next.js Public API URL (NEXT_PUBLIC_API_URL):</label>
+            <input type="url" id="envNextPublicApiUrl" value="http://localhost:8000/api">
+        </div>
+
+        <div class='item'>
+            <label for="envSearchApi">Search API (SEARCH_API):</label>
+            <select id="envSearchApi" onchange="toggleSearchApiKeys()">
+                <option value="tavily" selected>tavily</option>
+                <option value="duckduckgo">duckduckgo</option>
+                <option value="brave_search">brave_search</option>
+                <option value="arxiv">arxiv</option>
+            </select>
+        </div>
+
+        <div class='item' id="tavilyApiKeyGroup">
+            <label for="envTavilyApiKey">Tavily API Key (TAVILY_API_KEY):</label>
+            <input type="password" id="envTavilyApiKey" placeholder="tvly-xxx">
+        </div>
+
+        <div class='item hidden' id="braveSearchApiKeyGroup">
+            <label for="envBraveSearchApiKey">Brave Search API Key (BRAVE_SEARCH_API_KEY):</label>
+            <input type="password" id="envBraveSearchApiKey" placeholder="your-brave-key">
+        </div>
+         <div class='item'>
+            <label for="envJinaApiKey">Jina API Key (JINA_API_KEY) (Optional):</label>
+            <input type="password" id="envJinaApiKey" placeholder="jina_xxx or leave blank">
+        </div>
+        
+        <div class="advanced-toggle">
+            <h3 id="tts-toggle" onclick="toggleAdvanced('tts-content', this)">Volcengine TTS (Optional) ▼</h3>
+            <div id="tts-content" class="advanced-content">
+                <div class='item'>
+                    <label for="envVolcengineTtsAppid">Volcengine TTS App ID (VOLCENGINE_TTS_APPID):</label>
+                    <input type="password" id="envVolcengineTtsAppid" placeholder="your-app-id">
+                </div>
+                <div class='item'>
+                    <label for="envVolcengineTtsAccessToken">Volcengine TTS Access Token (VOLCENGINE_TTS_ACCESS_TOKEN):</label>
+                    <input type="password" id="envVolcengineTtsAccessToken" placeholder="your-access-token">
+                </div>
+                <div class='item'>
+                    <label for="envVolcengineTtsCluster">Volcengine TTS Cluster (VOLCENGINE_TTS_CLUSTER):</label>
+                    <input type="text" id="envVolcengineTtsCluster" value="volcano_tts">
+                </div>
+                <div class='item'>
+                    <label for="envVolcengineTtsVoiceType">Volcengine TTS Voice Type (VOLCENGINE_TTS_VOICE_TYPE):</label>
+                    <input type="text" id="envVolcengineTtsVoiceType" value="BV700_V2_streaming">
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>conf.yaml Configuration (BASIC_MODEL)</legend>
+         <p class="note" style="font-size: 0.85em;">
+            Refer to <code>docs/configuration_guide.md</code> for DeerFlow specific examples.
+            For a comprehensive list of all supported LLM providers and their specific model strings or required environment variables for LiteLLM,
+            please consult the <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer">LiteLLM Providers Documentation</a>.
+        </p>
+        <div class='item'>
+            <label for="yamlProvider">LLM Provider Type:</label>
+            <select id="yamlProvider" onchange="toggleYamlProviderFields()">
+                <option value="openai" selected>OpenAI (Official)</option>
+                <option value="openai_compatible">OpenAI-Compatible (e.g. DeepSeek, Qwen, custom endpoint)</option>
+                <option value="ollama">Ollama (Local models)</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="azure">Azure OpenAI Service</option>
+                <option value="custom_litellm">Custom LiteLLM Provider (e.g., Bedrock, Groq, VertexAI)</option>
+            </select>
+        </div>
+
+        <div id="yamlOpenaiGroup">
+            <div class='item'>
+                <label for="yamlModelOpenAI">Model Name (OpenAI):</label>
+                <input type="text" id="yamlModelOpenAI" value="gpt-4o" placeholder="e.g., gpt-4o, gpt-3.5-turbo">
+            </div>
+            <div class='item'>
+                <label for="yamlApiKeyOpenAI">API Key (OpenAI):</label>
+                <input type="password" id="yamlApiKeyOpenAI" placeholder="sk-...">
+            </div>
+            <p class="note" style="font-size: 0.85em;"><code>base_url</code> will be set to <code>https://api.openai.com/v1</code> automatically.</p>
+        </div>
+
+        <div id="yamlOpenaiCompatibleGroup" class="hidden">
+             <div class='item'>
+                <label for="yamlBaseUrlOC">Base URL:</label>
+                <input type="url" id="yamlBaseUrlOC" placeholder="e.g., https://api.deepseek.com">
+            </div>
+            <div class='item'>
+                <label for="yamlModelOC">Model Name:</label>
+                <input type="text" id="yamlModelOC" placeholder="e.g., deepseek-chat">
+            </div>
+            <div class='item'>
+                <label for="yamlApiKeyOC">API Key:</label>
+                <input type="password" id="yamlApiKeyOC" placeholder="your-api-key">
+            </div>
+        </div>
+        <div id="yamlOllamaGroup" class="hidden">
+            <div class='item'>
+                <label for="yamlBaseUrlOllama">Base URL (Ollama):</label>
+                <input type="url" id="yamlBaseUrlOllama" value="http://localhost:11434">
+            </div>
+            <div class='item'>
+                <label for="yamlModelOllama">Model Name (Ollama):</label>
+                <input type="text" id="yamlModelOllama" placeholder="ollama/your-model-name (e.g. ollama/mistral)">
+            </div>
+        </div>
+        <div id="yamlOpenRouterGroup" class="hidden">
+            <div class='item'>
+                <label for="yamlBaseUrlOR">Base URL (OpenRouter):</label>
+                <input type="url" id="yamlBaseUrlOR" value="https://openrouter.ai/api/v1">
+            </div>
+            <div class='item'>
+                <label for="yamlModelOR">Model Name (OpenRouter):</label>
+                <input type="text" id="yamlModelOR" placeholder="openrouter/provider/model-name">
+            </div>
+            <div class='item'>
+                <label for="yamlApiKeyOR">API Key (OpenRouter):</label>
+                <input type="text" id="yamlApiKeyOR" placeholder="$OPENROUTER_API_KEY or actual key">
+            </div>
+            <p class="note" style="font-size: 0.85em;">If using <code>$OPENROUTER_API_KEY</code>, ensure it's set in your <code>.env</code> file.</p>
+        </div>
+        <div id="yamlAzureGroup" class="hidden">
+            <div class='item'>
+                <label for="yamlModelAzure">Model (Deployment Name, Azure):</label>
+                <input type="text" id="yamlModelAzure" placeholder="azure/your-deployment-name">
+            </div>
+            <div class='item'>
+                <label for="yamlApiBaseAzure">API Base (Azure):</label>
+                <input type="text" id="yamlApiBaseAzure" placeholder="$AZURE_API_BASE or actual URL">
+            </div>
+            <div class='item'>
+                <label for="yamlApiVersionAzure">API Version (Azure):</label>
+                <input type="text" id="yamlApiVersionAzure" placeholder="$AZURE_API_VERSION or e.g., 2024-02-01">
+            </div>
+            <div class='item'>
+                <label for="yamlApiKeyAzure">API Key (Azure):</label>
+                <input type="text" id="yamlApiKeyAzure" placeholder="$AZURE_API_KEY or actual key">
+            </div>
+            <p class="note" style="font-size: 0.85em;">If using <code>$VARIABLES</code>, ensure they are set in your <code>.env</code> file.</p>
+        </div>
+        <div id="yamlCustomLiteLLMGroup" class="hidden">
+            <div class='item'>
+                <label for="yamlModelCustom">Model String (LiteLLM format):</label>
+                <input type="text" id="yamlModelCustom" placeholder="e.g., bedrock/anthropic.claude-3-opus, groq/llama3-70b-8192">
+            </div>
+            <div class='item'>
+                <label for="yamlApiKeyCustom">API Key (Optional, if not using environment variables):</label>
+                <input type="password" id="yamlApiKeyCustom" placeholder="your-api-key or leave blank">
+            </div>
+            <div class='item'>
+                <label for="yamlBaseUrlCustom">Base URL (Optional, if needed by provider):</label>
+                <input type="url" id="yamlBaseUrlCustom" placeholder="Provider's API endpoint if non-standard">
+            </div>
+            <p class="warning">
+                For custom LiteLLM providers, API keys are often set via environment variables in <code>.env</code> (e.g., <code>AWS_ACCESS_KEY_ID</code> for Bedrock, <code>GROQ_API_KEY</code> for Groq).
+                If you provide an API key here, it will be added to <code>conf.yaml</code>.
+                Consult the <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer">LiteLLM Providers Documentation</a> for the correct model string and how API keys are managed for your chosen provider.
+            </p>
+        </div>
+    </fieldset>
+
+    <div class='item'>
+        <button type="submit">Apply Configuration & Start DeerFlow Install/Update</button>
+    </div>
+</form>
+
+<script>
+function toggleAdvanced(contentId, headerElement) {
+  const content = document.getElementById(contentId);
+  const isHidden = content.style.display === "none" || content.style.display === "";
+  content.style.display = isHidden ? "block" : "none";
+  headerElement.textContent = headerElement.textContent.replace(isHidden ? "▼" : "▲", isHidden ? "▲" : "▼");
+}
+
+function toggleSearchApiKeys() {
+    const searchApi = document.getElementById('envSearchApi').value;
+    document.getElementById('tavilyApiKeyGroup').style.display = (searchApi === 'tavily' ? 'block' : 'none');
+    document.getElementById('braveSearchApiKeyGroup').style.display = (searchApi === 'brave_search' ? 'block' : 'none');
+}
+
+function toggleYamlProviderFields() {
+    const provider = document.getElementById('yamlProvider').value;
+    const groups = ['yamlOpenaiGroup', 'yamlOpenaiCompatibleGroup', 'yamlOllamaGroup', 'yamlOpenRouterGroup', 'yamlAzureGroup', 'yamlCustomLiteLLMGroup'];
+    groups.forEach(id => {
+        document.getElementById(id).style.display = 'none';
+    });
+
+    let groupToShowId = '';
+    if (provider === 'openai') groupToShowId = 'yamlOpenaiGroup';
+    else if (provider === 'openai_compatible') groupToShowId = 'yamlOpenaiCompatibleGroup';
+    else if (provider === 'ollama') groupToShowId = 'yamlOllamaGroup';
+    else if (provider === 'openrouter') groupToShowId = 'yamlOpenRouterGroup';
+    else if (provider === 'azure') groupToShowId = 'yamlAzureGroup';
+    else if (provider === 'custom_litellm') groupToShowId = 'yamlCustomLiteLLMGroup';
+    
+    if (groupToShowId) {
+        document.getElementById(groupToShowId).style.display = 'block';
+    }
+}
+
+document.getElementById("configForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  let params = new URLSearchParams();
+
+  // .env params
+  params.set("env_debug", document.getElementById('envDebug').value);
+  params.set("env_app_env", document.getElementById('envAppEnv').value);
+  params.set("env_next_public_api_url", document.getElementById('envNextPublicApiUrl').value);
+  
+  const searchApi = document.getElementById('envSearchApi').value;
+  params.set("env_search_api", searchApi);
+  if (searchApi === 'tavily') {
+    params.set("env_tavily_api_key", document.getElementById('envTavilyApiKey').value);
+  }
+  if (searchApi === 'brave_search') {
+    params.set("env_brave_search_api_key", document.getElementById('envBraveSearchApiKey').value);
+  }
+  params.set("env_jina_api_key", document.getElementById('envJinaApiKey').value);
+
+  // TTS (check if tts-content is visible)
+  if (document.getElementById('tts-content').style.display === 'block') {
+      params.set("env_volcengine_tts_appid", document.getElementById('envVolcengineTtsAppid').value);
+      params.set("env_volcengine_tts_access_token", document.getElementById('envVolcengineTtsAccessToken').value);
+      params.set("env_volcengine_tts_cluster", document.getElementById('envVolcengineTtsCluster').value);
+      params.set("env_volcengine_tts_voice_type", document.getElementById('envVolcengineTtsVoiceType').value);
+  } else { // Send empty if not configuring TTS to clear them if they existed
+      params.set("env_volcengine_tts_appid", "");
+      params.set("env_volcengine_tts_access_token", "");
+      params.set("env_volcengine_tts_cluster", "volcano_tts"); // Default
+      params.set("env_volcengine_tts_voice_type", "BV700_V2_streaming"); // Default
+  }
+
+
+  // conf.yaml params
+  const yamlProvider = document.getElementById('yamlProvider').value;
+  params.set("yaml_provider", yamlProvider);
+
+  if (yamlProvider === 'openai') {
+    params.set("yaml_model", document.getElementById('yamlModelOpenAI').value);
+    params.set("yaml_api_key", document.getElementById('yamlApiKeyOpenAI').value);
+  } else if (yamlProvider === 'openai_compatible') {
+    params.set("yaml_base_url", document.getElementById('yamlBaseUrlOC').value);
+    params.set("yaml_model", document.getElementById('yamlModelOC').value);
+    params.set("yaml_api_key", document.getElementById('yamlApiKeyOC').value);
+  } else if (yamlProvider === 'ollama') {
+    params.set("yaml_base_url", document.getElementById('yamlBaseUrlOllama').value);
+    params.set("yaml_model", document.getElementById('yamlModelOllama').value);
+  } else if (yamlProvider === 'openrouter') {
+    params.set("yaml_base_url", document.getElementById('yamlBaseUrlOR').value);
+    params.set("yaml_model", document.getElementById('yamlModelOR').value);
+    params.set("yaml_api_key", document.getElementById('yamlApiKeyOR').value);
+  } else if (yamlProvider === 'azure') {
+    params.set("yaml_model", document.getElementById('yamlModelAzure').value);
+    params.set("yaml_api_base", document.getElementById('yamlApiBaseAzure').value);
+    params.set("yaml_api_version", document.getElementById('yamlApiVersionAzure').value);
+    params.set("yaml_api_key", document.getElementById('yamlApiKeyAzure').value);
+  } else if (yamlProvider === 'custom_litellm') {
+    params.set("yaml_model", document.getElementById('yamlModelCustom').value);
+    params.set("yaml_api_key", document.getElementById('yamlApiKeyCustom').value);
+    params.set("yaml_base_url", document.getElementById('yamlBaseUrlCustom').value);
+  }
+    
+  // You might want to add the Git URL for DeerFlow here if it's not hardcoded in apply_config.js
+  // params.set("deerflow_git_url", "https://github.com/bytedance/deer-flow.git");
+
+  location.href = "apply_config.js?" + params.toString();
+});
+
+// Initial UI setup
+window.onload = () => {
+    toggleSearchApiKeys();
+    toggleYamlProviderFields(); // This will set the initial visibility based on the default 'openai'
+    document.getElementById('tts-content').style.display = 'none'; 
+    // If you want to load existing values, Pinokio would need a way to pass them to the HTML,
+    // or the `apply_config.js` would need to read them and the HTML would fetch them.
+    // For simplicity of Pinokio setup, this form starts fresh each time.
+};
+
+</script>
+</body>
+</html>

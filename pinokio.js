@@ -3,9 +3,9 @@ module.exports = {
   version: "3.7",
   title: "deer-flow",
   description: "",
-  icon: "icon.png",
+  icon: "icon.jpg",
   menu: async (kernel, info) => {
-    let installed = info.exists("app/env")
+    let installed = info.exists("app/.venv")
     let running = {
       install: info.running("install.js"),
       start: info.running("start.js"),
@@ -78,6 +78,10 @@ module.exports = {
           text: "Install",
           href: "install.js",
         }, {
+          icon: "fa-solid fa-gear",
+          text: "Change Configuration",
+          href: "configure.html?raw=true",
+        },{
           icon: "fa-solid fa-file-zipper",
           text: "<div><strong>Save Disk Space</strong><div>Deduplicates redundant library files</div></div>",
           href: "link.js",
