@@ -378,9 +378,6 @@ document.getElementById("configForm").addEventListener("submit", async (e) => {
     params.set("yaml_base_url", document.getElementById('yamlBaseUrlCustom').value);
   }
     
-  // You might want to add the Git URL for DeerFlow here if it's not hardcoded in apply_config.js
-  // params.set("deerflow_git_url", "https://github.com/bytedance/deer-flow.git");
-
   location.href = "apply_config.js?" + params.toString();
 });
 
