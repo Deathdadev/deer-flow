@@ -3,7 +3,7 @@ module.exports = {
   version: "3.7",
   title: "deer-flow",
   description: "",
-  icon: "icon.jpg",
+  icon: "icon.png",
   menu: async (kernel, info) => {
     let installed = info.exists("app/.venv")
     let running = {
